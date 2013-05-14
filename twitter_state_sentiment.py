@@ -1,7 +1,16 @@
 import sys
 import json
 
-# WORKING
+# _____________________________________________________________________
+# The purpose of this script is to calculate the sentiment of US States
+# based on the tweets sourced from a live twitter feed
+# 
+# 
+# written by: Gurdip Khasriya May 2013
+# _____________________________________________________________________
+
+
+# Build a dictionary of subjective words attached to a sentiment value
 def sentimentDict(fp):
 	di = {}
 	for line in fp:
@@ -10,7 +19,8 @@ def sentimentDict(fp):
 		di[els[0]] = int(els[1])
 	return di
 
-# WORKING - returns the list of states and texts for each tweet
+# Creates a list of states and texts from tweets that are from the USA
+# and possess a state in their location data
 def tweetStatesandText(fp):
 	stateList = []
 	textList = []
@@ -18,7 +28,7 @@ def tweetStatesandText(fp):
 		try:
 			tweet = json.loads(string)
 		except:
-			exit("WARNING!!!!! TWEET NOT PARSED")
+			exit("TWEET NOT PARSED")
 		tweetState = ""
 		tweetText = ""
 		if 'text' in tweet and 'place' in tweet and tweet['place'] != None:
@@ -36,7 +46,8 @@ def tweetStatesandText(fp):
 	return stateList, textList
 
 
-# WORKING
+# Calculates the sentiment value of each tweet by matching words of a 
+# tweet to a word in the sentiment dictionary
 def calcSentiment(sentimentDict,tweetList):
 	listSentiment = []
 	for line in tweetList:
@@ -49,7 +60,8 @@ def calcSentiment(sentimentDict,tweetList):
 	return listSentiment
 
 
-# NEXT STEP - Putting together tweet state and total mood!
+# Tweets are aggregated by their state, and the average mood of each
+# state is calculated by counting and totalling tweets + sentiments
 def aggregateStateSentiments (stateList, scoreList):
 	
 	states = stateList
@@ -72,24 +84,22 @@ def aggregateStateSentiments (stateList, scoreList):
 			statetoScoreAvg[i] = float(stateToScore[i]) / float(stateSentimentCount[i])
 	return statetoScoreAvg
 
-
+# Testing for the main method
 def hw():
     print 'Hello, world!'
 
+# Testing for the main method
 def lines(fp):
     print str(len(fp.readlines()))
 
+# main method calls all of the relevant functions, and prints the results
+# in JSON format for use in the D3.js heat map of the USA
 def main():
     sent_file = open(sys.argv[1])
     tweet_file = open(sys.argv[2])
-    # Dictionary of sentiments and value
     sentiments = sentimentDict(sent_file)
     listStates, listTweets = tweetStatesandText(tweet_file)
-
     scoreList = calcSentiment(sentiments, listTweets)
-
-    # print listStates
-    # print calcSentiment(sentiments, listTweets)
 
     results = json.dumps(aggregateStateSentiments(listStates, scoreList))
     print results
